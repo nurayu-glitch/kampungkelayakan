@@ -1,0 +1,573 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Kampung Kelayakan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Tata letak: panggung 3D lengket di kiri, panel misi di kanan; satu kolom di ponsel */
+:root{--bg:#EDF2F1;--surface:#FFFFFF;--surface2:#E1EAE8;--fg:#10302E;--muted:#4A6664;--line:#C3D2CF;--accent:#0B6B66;--accent-fg:#FFFFFF;--amber:#B87000;--good:#1F7547;--warn:#9A6200;--bad:#B2372B;--stage1:#12423F;--stage2:#082322;--font-d:'Space Grotesk',system-ui,sans-serif;--font-b:'Inter',system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B1817;--surface:#122524;--surface2:#183130;--fg:#E3EFED;--muted:#9DB5B2;--line:#25413F;--accent:#4FC6BC;--accent-fg:#06201F;--amber:#F0B13A;--good:#5FCB8C;--warn:#F0B13A;--bad:#F2796C;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0B1817;--surface:#122524;--surface2:#183130;--fg:#E3EFED;--muted:#9DB5B2;--line:#25413F;--accent:#4FC6BC;--accent-fg:#06201F;--amber:#F0B13A;--good:#5FCB8C;--warn:#F0B13A;--bad:#F2796C;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-b);font-size:15px;line-height:1.55;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 40px}
+h1,h2,h3{font-family:var(--font-d);line-height:1.2;margin:0;text-wrap:balance}
+p{margin:0 0 10px}
+.wrap{max-width:1180px;margin:0 auto}
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 18px;margin-bottom:12px}
+.brand h1{font-size:1.45rem;letter-spacing:-.01em}
+.brand small{color:var(--muted);display:block;font-size:.82rem}
+.time{font-size:.82rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.stepper{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.st{font:inherit;font-size:.82rem;font-weight:500;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:8px;padding:6px 10px;cursor:pointer;display:flex;gap:6px;align-items:center}
+.st b{font-family:var(--font-d);color:var(--muted);font-weight:600}
+.st.on{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.st.on b{color:inherit}
+.st.ok::after{content:"✓";color:var(--good);font-weight:700}
+.st.on.ok::after{color:inherit}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start}
+.stage-card{position:sticky;top:12px;border-radius:12px;overflow:hidden;background:linear-gradient(160deg,var(--stage1),var(--stage2));border:1px solid var(--line)}
+#stage{position:relative;width:100%;aspect-ratio:4/3;min-height:280px;touch-action:none;cursor:grab}
+#stage:active{cursor:grabbing}
+#stage canvas{display:block;width:100%;height:100%}
+.labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.lab{position:absolute;transform:translate(-50%,-100%);background:rgba(8,35,34,.82);color:#E6F3F1;border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:3px 10px;font-size:.75rem;white-space:nowrap;pointer-events:auto;cursor:pointer;font-family:var(--font-b)}
+.lab.on{background:#F0B13A;color:#2A1B00;border-color:#F0B13A}
+.tools{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;background:rgba(8,35,34,.55)}
+.tools button{font:inherit;font-size:.78rem;color:#E6F3F1;background:transparent;border:1px solid rgba(255,255,255,.3);border-radius:7px;padding:4px 9px;cursor:pointer}
+.tools button.on{background:#F0B13A;color:#2A1B00;border-color:#F0B13A}
+.hint{width:100%;font-size:.74rem;color:#B9D3CF;margin:0}
+.panel{display:flex;flex-direction:column;gap:12px;min-width:0}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:0}
+.kpi span{display:block;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.kpi b{font-family:var(--font-d);font-size:1.05rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+.kpi b.neg{color:var(--bad)}.kpi b.pos{color:var(--good)}
+.verdict{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:.85rem}
+.chip{display:inline-block;border-radius:999px;padding:2px 11px;font-weight:600;font-size:.8rem;border:1px solid currentColor}
+.chip.good{color:var(--good)}.chip.warn{color:var(--warn)}.chip.bad{color:var(--bad)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.card h2{font-size:1.2rem;margin-bottom:4px}
+.eyebrow{font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.lead{color:var(--muted)}
+.sub{font-family:var(--font-d);font-size:.95rem;margin:14px 0 6px}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.opt{font:inherit;text-align:left;background:var(--surface2);color:var(--fg);border:2px solid transparent;border-radius:10px;padding:10px;cursor:pointer;min-width:0}
+.opt b{display:block;font-size:.9rem}
+.opt small{color:var(--muted);font-size:.78rem}
+.opt.on{border-color:var(--accent);background:var(--surface)}
+.rng{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;margin:8px 0}
+.rng label{font-size:.88rem}
+.rng output{font-family:var(--font-d);font-weight:600;font-variant-numeric:tabular-nums}
+.rng input{grid-column:1/-1;width:100%;accent-color:var(--accent)}
+.btn{font:inherit;font-weight:600;background:var(--accent);color:var(--accent-fg);border:0;border-radius:9px;padding:9px 16px;cursor:pointer}
+.btn.sec{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.btn:disabled{opacity:.55;cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.note{font-size:.83rem;color:var(--muted);background:var(--surface2);border-radius:8px;padding:8px 10px;margin:10px 0 0}
+.live{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:10px}
+.live div{background:var(--surface2);border-radius:8px;padding:7px 10px;font-size:.78rem;color:var(--muted)}
+.live b{display:block;color:var(--fg);font-family:var(--font-d);font-size:1rem;font-variant-numeric:tabular-nums}
+.tbl{overflow-x:auto;margin-top:8px}
+table{border-collapse:collapse;width:100%;font-size:.82rem;font-variant-numeric:tabular-nums}
+th,td{text-align:right;padding:5px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:500}
+td.neg{color:var(--bad)}
+.checks{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:5px;font-size:.86rem}
+.checks li::before{content:"✗ ";color:var(--bad);font-weight:700}
+.checks li.p::before{content:"✓ ";color:var(--good)}
+.who{display:grid;gap:8px}
+.who .opt small{display:block;margin-top:3px}
+.bars{display:grid;gap:6px;margin-top:8px}
+.bar{display:grid;grid-template-columns:70px 1fr 78px;gap:8px;align-items:center;font-size:.8rem}
+.bar i{display:block;height:14px;border-radius:4px;background:var(--accent);min-width:2px}
+.bar i.n{background:var(--bad)}
+.bar em{font-style:normal;text-align:right;font-variant-numeric:tabular-nums}
+.q{margin:10px 0}
+.q p{font-weight:500;margin-bottom:6px}
+.q .opt{padding:7px 10px;margin-bottom:5px;width:100%}
+.q .opt.ok{border-color:var(--good)}.q .opt.no{border-color:var(--bad)}
+textarea,input[type=text]{font:inherit;width:100%;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.ai{white-space:pre-wrap;background:var(--surface2);border-radius:10px;padding:12px;font-size:.9rem;margin-top:10px}
+.score{font-family:var(--font-d);font-size:2rem;font-weight:700;color:var(--accent)}
+@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}.stage-card{position:relative;top:0}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+</style>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>Kampung Kelayakan</h1>
+      <small>Studi kelayakan bisnis dalam kampung 3D, berbasis musyawarah Kalo Sara</small>
+    </div>
+    <div class="time" id="timeLeft">Estimasi sisa ±18 menit</div>
+  </header>
+  <nav class="stepper" id="stepper" aria-label="Misi"></nav>
+  <div class="grid">
+    <section class="stage-card" aria-label="Kampung 3D">
+      <div id="stage"><div class="labels" id="labels"></div></div>
+      <div class="tools">
+        <button id="bRot" class="on" type="button">Putar otomatis</button>
+        <button id="bVr" type="button">Mode VR Cardboard</button>
+        <button id="bReset" type="button">Atur ulang kamera</button>
+        <p class="hint">Seret untuk memutar, cubit atau gulir untuk zoom, ketuk bangunan atau label untuk pindah misi.</p>
+      </div>
+    </section>
+    <aside class="panel">
+      <div class="kpis" id="kpis"></div>
+      <div class="verdict" id="verdict"></div>
+      <div id="content"></div>
+    </aside>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
+const fmt=(n,d=0)=>(n==null||!isFinite(n))?'–':Number(n).toLocaleString('id-ID',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmtP=x=>x==null?'–':fmt(x*100,1)+'%';
+const rp=n=>'Rp'+fmt(n);
+
+/* Kasus bawaan (angka hipotetik untuk latihan). Efek saran: k = variabel, p = perubahan persen */
+const PRESETS=[
+{nama:'Sagu Instan Sinonggi',produk:'sagu instan kemasan 500 g',unit:'kg',investasi:200,kapasitas:2500,harga:40000,biayaVar:26000,biayaTetap:17,tumbuh:15,util1:55,
+ nilai:'Sinonggi, pangan pokok orang Tolaki',
+ kearifan:'Sinonggi dari sagu adalah makanan khas Tolaki. Usaha ini membuatnya praktis tanpa melepas cara penyajian adat, dan membeli sagu dari petani di sentra sekitar.',
+ stakeholder:[
+  {peran:'Petani sagu',saran:'Beli sagu dengan harga kontrak tetap supaya pendapatan kami stabil.',efek:[{k:'biayaVar',p:5}]},
+  {peran:'Ibu rumah tangga pembeli',saran:'Sediakan kemasan kecil dengan harga bersahabat.',efek:[{k:'harga',p:-6},{k:'util1',p:8}]},
+  {peran:'Pemuda desa',saran:'Latih warga sebagai tenaga produksi tetap agar mutu terjaga.',efek:[{k:'biayaTetap',p:6},{k:'util1',p:3}]}]},
+{nama:'Tenun Tolaki Kontemporer',produk:'kain dan produk jadi tenun Tolaki',unit:'lembar',investasi:110,kapasitas:80,harga:450000,biayaVar:255000,biayaTetap:6,tumbuh:12,util1:50,
+ nilai:'Motif dan tenun Tolaki',
+ kearifan:'Tenun Tolaki menyimpan motif dan makna adat. Usaha ini mengemasnya dalam produk modern bersama penenun lokal, dan menjaga agar motif sakral tidak dipakai sembarangan.',
+ stakeholder:[
+  {peran:'Penenun',saran:'Bayar upah per lembar yang layak dan tepat waktu.',efek:[{k:'biayaVar',p:6}]},
+  {peran:'Tokoh adat',saran:'Batasi varian motif sakral, pakai motif umum untuk produk massal.',efek:[{k:'util1',p:-5}]},
+  {peran:'Pembeli wisata',saran:'Tambah produk kecil untuk oleh-oleh seperti dompet dan selendang.',efek:[{k:'util1',p:10},{k:'investasi',p:6}]}]},
+{nama:'Olahan Rumput Laut Pesisir',produk:'kerupuk dan dodol rumput laut',unit:'kg',investasi:220,kapasitas:1500,harga:55000,biayaVar:34000,biayaTetap:12,tumbuh:12,util1:50,
+ nilai:'Gotong royong kelompok pesisir',
+ kearifan:'Warga pesisir mengelola rumput laut bersama kelompok tani. Gotong royong kelompok menjadi dasar pembagian tugas dan hasil usaha.',
+ stakeholder:[
+  {peran:'Pembudidaya rumput laut',saran:'Beli langsung dari kelompok tani dengan harga yang adil.',efek:[{k:'biayaVar',p:4}]},
+  {peran:'Kelompok ibu pengolah',saran:'Libatkan ibu-ibu kelompok sebagai pengolah tetap.',efek:[{k:'biayaTetap',p:5},{k:'util1',p:4}]},
+  {peran:'Penyuluh dinas',saran:'Urus izin PIRT dan label halal sebelum berjualan luas.',efek:[{k:'investasi',p:5},{k:'util1',p:8}]}]}
+];
+const SEG=[
+ {n:'Rumah tangga sekitar',t:'Pembeli tetap, sangat peka harga',u:1,v:1,e:1.6},
+ {n:'Toko oleh-oleh dan wisata',t:'Volume lebih kecil, harga lebih toleran',u:.9,v:1.02,e:.9},
+ {n:'Reseller luar daerah',t:'Volume besar, ongkos kirim tinggi',u:1.15,v:1.06,e:1.3}];
+const LOC=[
+ {n:'Kota Kendari',t:'Dekat pasar, sewa mahal',F:1.15,V:1.02,u:1.1,jarak:6},
+ {n:'Konawe',t:'Dekat bahan baku, pasar lebih jauh',F:.92,V:.93,u:.95,jarak:2},
+ {n:'Konawe Selatan',t:'Posisi tengah',F:1,V:.97,u:1,jarak:4}];
+const STEPS=[
+ {n:'Kasus',m:2},{n:'Pasar',m:3},{n:'Teknis',m:3},{n:'Keuangan',m:4},{n:'Rembuk Kalo',m:3},{n:'Putusan',m:4}];
+
+const S={step:0,seen:{0:1},kasus:PRESETS[0],seg:0,pf:1,loc:2,k:1,r:12,g:15,infl:3,adopt:[],scen:'dasar',quiz:{},dec:null,alasan:'',ai:'',busy:false,genMsg:'',vr:false,rot:true};
+
+function params(scen){
+ const c=S.kasus,sg=SEG[S.seg],lc=LOC[S.loc],m={harga:1,biayaVar:1,biayaTetap:1,util1:1,investasi:1};
+ S.adopt.forEach(i=>c.stakeholder[i].efek.forEach(e=>{m[e.k]*=1+e.p/100}));
+ const sc=scen==='pesimis'?{u:.85,v:1.08}:scen==='optimis'?{u:1.1,v:.97}:{u:1,v:1};
+ return {I:c.investasi*(.55+.45*S.k)*m.investasi,Q:c.kapasitas*S.k,F:c.biayaTetap*(.75+.25*S.k)*lc.F*m.biayaTetap,
+  V:c.biayaVar*sg.v*lc.V*m.biayaVar*sc.v,P:c.harga*S.pf*m.harga,
+  u1:clamp(c.util1/100*sg.u*lc.u*Math.pow(1/S.pf,sg.e)*m.util1*sc.u,.1,.95),g:S.g/100,r:S.r/100,inf:S.infl/100};
+}
+function solveIRR(cfs){
+ const f=r=>cfs.reduce((a,c,i)=>a+c/Math.pow(1+r,i),0);
+ let lo=-.9,hi=10;if(f(lo)*f(hi)>0)return null;
+ for(let i=0;i<90;i++){const mid=(lo+hi)/2;(f(lo)*f(mid)<=0)?hi=mid:lo=mid}
+ return (lo+hi)/2;
+}
+function calc(scen=S.scen){
+ const p=params(scen),rows=[],cfs=[-p.I];let cum=-p.I,pbp=null;
+ for(let t=1;t<=5;t++){
+  const util=Math.min(.95,p.u1*Math.pow(1+p.g,t-1)),f=Math.pow(1+p.inf,t-1);
+  const units=p.Q*12*util,rev=units*p.P/1e6,vc=units*p.V*f/1e6,fc=p.F*12*f,tax=.005*rev;
+  const sal=t===5?.1*p.I:0,cf=rev-vc-fc-tax+sal,prev=cum;
+  rows.push({t,util,units,rev,vc,fc,tax,sal,cf});cfs.push(cf);cum+=cf;
+  if(pbp===null&&cum>=0&&cf>0)pbp=(t-1)+(-prev)/cf;
+ }
+ let npv=-p.I;rows.forEach(x=>{npv+=x.cf/Math.pow(1+p.r,x.t)});
+ const bepU=p.F*12*1e6/Math.max(1,p.P-p.V);
+ return {p,rows,npv,irr:solveIRR(cfs),pbp,bep:bepU/(p.Q*12),pi:(npv+p.I)/p.I};
+}
+function checks(m){return [
+ {t:'NPV bernilai positif',ok:m.npv>0},
+ {t:`IRR (${fmtP(m.irr)}) lebih besar dari tingkat diskon (${S.r}%)`,ok:m.irr!=null&&m.irr>m.p.r},
+ {t:`Modal kembali dalam 4 tahun atau kurang (${m.pbp==null?'belum kembali':fmt(m.pbp,1)+' tahun'})`,ok:m.pbp!=null&&m.pbp<=4},
+ {t:`Titik impas di bawah 70% kapasitas (${fmt(m.bep*100)}%)`,ok:m.bep<=.7}];}
+function level(m){const n=checks(m).filter(c=>c.ok).length;return n===4?{k:'good',t:'Layak'}:n>=2?{k:'warn',t:'Layak bersyarat'}:{k:'bad',t:'Belum layak'}}
+function loadCase(c){S.kasus=c;S.g=c.tumbuh;S.seg=0;S.pf=1;S.loc=2;S.k=1;S.r=12;S.infl=3;S.adopt=[];S.scen='dasar';S.quiz={};S.dec=null;S.alasan='';S.ai=''}
+/* ===== Scene 3D ===== */
+const ST=[
+ {step:1,x:-8,z:0,ry:Math.PI/2,lab:'1 Pasar'},
+ {step:2,x:0,z:-8,ry:0,lab:'2 Teknis'},
+ {step:3,x:8,z:0,ry:-Math.PI/2,lab:'3 Keuangan'},
+ {step:4,x:0,z:8,ry:Math.PI,lab:'4 Rembuk Kalo'}];
+let pickCb=()=>{};
+const stage=$('#stage'),labelsEl=$('#labels');
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+stage.insertBefore(renderer.domElement,labelsEl);
+const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(45,4/3,.1,250);
+scene.add(new THREE.HemisphereLight(0xdff7f2,0x1a3a37,.95));
+const sun=new THREE.DirectionalLight(0xfff1d6,.85);sun.position.set(10,18,8);scene.add(sun);
+const mat=(c,o)=>new THREE.MeshPhongMaterial(Object.assign({color:c,flatShading:true,shininess:4,specular:0x111111},o||{}));
+const mesh=(g,m,x,y,z,p)=>{const o=new THREE.Mesh(g,m);o.position.set(x||0,y||0,z||0);(p||scene).add(o);return o};
+const pickables=[];
+function tag(grp,step){grp.traverse(o=>{if(o.isMesh){o.userData.step=step;pickables.push(o)}})}
+const PCOL=[0xc0392b,0xd68910,0x1f7a8c,0x6c5b7b,0x2e7d4f];
+function person(col,parent,x,z){
+ const g=new THREE.Group();
+ mesh(new THREE.CylinderGeometry(.2,.26,.8,8),mat(col),0,.4,0,g);
+ g.userData.head=mesh(new THREE.SphereGeometry(.19,10,8),mat(0xe0b48a),0,.98,0,g);
+ g.position.set(x,0,z);g.userData.ph=Math.random()*6;parent.add(g);return g;
+}
+function palm(parent,x,z){
+ const g=new THREE.Group();
+ mesh(new THREE.CylinderGeometry(.12,.2,2.4,6),mat(0x7a5a38),0,1.2,0,g);
+ for(let i=0;i<6;i++){const a=i*Math.PI/3,f=mesh(new THREE.ConeGeometry(.14,1.7,3),mat(0x2f8a4d),Math.cos(a)*.6,2.4,Math.sin(a)*.6,g);f.rotation.set(0,-a,-1.2)}
+ g.position.set(x,0,z);parent.add(g);return g;
+}
+/* Tanah, air, jalan */
+mesh(new THREE.CircleGeometry(48,48),mat(0x0e5a63),0,-.45,0).rotation.x=-Math.PI/2;
+mesh(new THREE.CylinderGeometry(13.5,14.2,.8,44),mat(0x3d8b63),0,-.4,0);
+ST.forEach(s=>{const p=mesh(new THREE.BoxGeometry(1.3,.06,8),mat(0xd9c9a0),s.x/2,.02,s.z/2);p.rotation.y=Math.atan2(s.x,s.z)});
+/* Pusat: Kalo Sara */
+const center=new THREE.Group();scene.add(center);
+mesh(new THREE.CylinderGeometry(2.4,2.4,.08,32),mat(0xf4f0e6),0,.05,0,center);
+mesh(new THREE.TorusGeometry(2.1,.1,6,36),mat(0x8a5a2b),0,.12,0,center).rotation.x=Math.PI/2;
+const kalo=mesh(new THREE.TorusGeometry(1,.17,8,32),mat(0xc88a3a),0,.35,0,center);kalo.rotation.x=Math.PI/2;
+mesh(new THREE.CylinderGeometry(.06,.06,5,6),mat(0xd8d2c4),0,2.6,0,center);
+const flag=mesh(new THREE.BoxGeometry(1.5,.85,.05),mat(0xe0a21a),.78,4.6,0,center);
+tag(center,0);
+/* 1 Pasar */
+const gPasar=new THREE.Group();gPasar.position.set(ST[0].x,0,ST[0].z);gPasar.rotation.y=ST[0].ry;scene.add(gPasar);
+mesh(new THREE.BoxGeometry(4,.3,2),mat(0x9a6b3f),0,.55,0,gPasar);
+[[-1.9,-.9],[1.9,-.9],[-1.9,.9],[1.9,.9]].forEach(p=>mesh(new THREE.CylinderGeometry(.06,.06,2.4,6),mat(0x5a3d22),p[0],1.2,p[1],gPasar));
+[-1.5,-.5,.5,1.5].forEach((x,i)=>{const r=mesh(new THREE.BoxGeometry(1,.14,2.7),mat(i%2?0xe0a21a:0xb3322b),x,2.45,0,gPasar);r.rotation.x=.14});
+for(let i=0;i<6;i++)mesh(new THREE.BoxGeometry(.5,.4,.4),mat(0xf1ead8),-1.3+i*.5,.9,0,gPasar);
+const crowd=[];
+for(let i=0;i<18;i++)crowd.push(person(PCOL[i%5],gPasar,(i%6-2.5)*.85,2+Math.floor(i/6)*.9));
+tag(gPasar,1);
+/* 2 Teknis */
+const gTek=new THREE.Group();gTek.position.set(ST[1].x,0,ST[1].z);gTek.rotation.y=ST[1].ry;scene.add(gTek);
+const bld=new THREE.Group();gTek.add(bld);
+mesh(new THREE.BoxGeometry(4,2.2,3),mat(0xe8e0cf),0,1.1,0,bld);
+const roof=mesh(new THREE.ConeGeometry(3.1,1.3,4),mat(0x8a3d2c),0,2.85,0,bld);roof.rotation.y=Math.PI/4;
+mesh(new THREE.BoxGeometry(1,1.5,.1),mat(0x2a3a38),0,.75,1.52,bld);
+mesh(new THREE.CylinderGeometry(.25,.3,1.7,8),mat(0x8d8d8d),1.3,3,-.6,bld);
+const palms=new THREE.Group();gTek.add(palms);
+[[0,-1],[.9,.7],[-.8,1.6]].forEach(p=>palm(palms,p[0],p[1]));
+const truck=new THREE.Group();gTek.add(truck);
+mesh(new THREE.BoxGeometry(1.5,.7,.8),mat(0x1f7a8c),0,.6,0,truck);mesh(new THREE.BoxGeometry(.6,.6,.8),mat(0xd68910),.95,.55,0,truck);
+[-.5,.5,1].forEach(x=>mesh(new THREE.CylinderGeometry(.18,.18,.9,8),mat(0x222222),x,.2,0,truck).rotation.x=Math.PI/2);
+truck.position.z=2.2;palms.position.z=2.2;
+tag(gTek,2);
+/* 3 Keuangan */
+const gKeu=new THREE.Group();gKeu.position.set(ST[2].x,0,ST[2].z);gKeu.rotation.y=ST[2].ry;scene.add(gKeu);
+mesh(new THREE.BoxGeometry(7.4,3.6,.3),mat(0x14302f),0,2.2,0,gKeu);
+mesh(new THREE.BoxGeometry(7,.04,.34),mat(0xf0b13a),0,2.4,.02,gKeu);
+mesh(new THREE.BoxGeometry(.3,.6,.3),mat(0x5a3d22),-2.5,.3,0,gKeu);mesh(new THREE.BoxGeometry(.3,.6,.3),mat(0x5a3d22),2.5,.3,0,gKeu);
+const bars=[];
+for(let i=0;i<6;i++){const b=mesh(new THREE.BoxGeometry(.7,1,.4),mat(0x2fa862),(i-2.5)*1.1,2.4,.3,gKeu);bars.push(b)}
+const coins=[];
+for(let i=0;i<12;i++)coins.push(mesh(new THREE.CylinderGeometry(.4,.4,.1,16),mat(0xf0b13a),0,.06+i*.13,0,(function(){const g=new THREE.Group();g.position.set(0,0,1.6);gKeu.add(g);return g})()));
+tag(gKeu,3);
+/* 4 Rembuk Kalo */
+const gRem=new THREE.Group();gRem.position.set(ST[3].x,0,ST[3].z);gRem.rotation.y=ST[3].ry;scene.add(gRem);
+mesh(new THREE.CylinderGeometry(2.6,2.6,.12,28),mat(0xc9a766),0,.06,0,gRem);
+mesh(new THREE.TorusGeometry(.6,.1,6,24),mat(0xc88a3a),0,.2,0,gRem).rotation.x=Math.PI/2;
+const adv=[];
+[0,1,2].forEach(i=>{const a=i*2*Math.PI/3+Math.PI,x=Math.sin(a)*1.7,z=Math.cos(a)*1.7;
+ mesh(new THREE.CylinderGeometry(.3,.3,.35,10),mat(0x6b4a2b),x*1.25,.2,z*1.25,gRem);
+ const p=person(PCOL[i+1],gRem,x,z);p.scale.setScalar(1.25);adv.push(p)});
+tag(gRem,4);
+/* Label HTML */
+const labs=[{step:0,x:0,z:0,y:5.6,lab:'Kalo Sara'}].concat(ST.map(s=>({step:s.step,x:s.x,z:s.z,y:4.4,lab:s.lab}))).map(l=>{
+ const d=document.createElement('div');d.className='lab';d.textContent=l.lab;d.addEventListener('click',()=>pickCb(l.step));labelsEl.appendChild(d);l.el=d;l.v=new THREE.Vector3(l.x,l.y,l.z);return l});
+/* Kamera orbit buatan sendiri */
+const cur={th:.8,ph:1.0,rad:34,tx:0,tz:0},goal=Object.assign({},cur);
+const angDiff=(a,b)=>{let d=(b-a)%(2*Math.PI);if(d>Math.PI)d-=2*Math.PI;if(d<-Math.PI)d+=2*Math.PI;return d};
+function sceneFocus(step){
+ const s=ST.find(q=>q.step===step);
+ if(s){goal.tx=s.x*.55;goal.tz=s.z*.55;goal.rad=17;goal.ph=1.05;goal.th=cur.th+angDiff(cur.th,Math.atan2(s.x,s.z)+Math.PI)}
+ else{goal.tx=0;goal.tz=0;goal.rad=32;goal.ph=1.0}
+ labs.forEach(l=>l.el.classList.toggle('on',l.step===step));
+}
+function resetCam(){goal.th=cur.th;goal.tx=0;goal.tz=0;goal.rad=32;goal.ph=1.0}
+const ptrs=new Map();let moved=0,pinch0=0,downT=0;
+stage.addEventListener('pointerdown',e=>{stage.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=0;downT=performance.now();if(ptrs.size===2){const [a,b]=[...ptrs.values()];pinch0=Math.hypot(a.x-b.x,a.y-b.y)}});
+stage.addEventListener('pointermove',e=>{
+ const p=ptrs.get(e.pointerId);if(!p)return;
+ if(ptrs.size===1){const dx=e.clientX-p.x,dy=e.clientY-p.y;moved+=Math.abs(dx)+Math.abs(dy);cur.th-=dx*.006;cur.ph=clamp(cur.ph-dy*.005,.35,1.45);goal.th=cur.th;goal.ph=cur.ph}
+ p.x=e.clientX;p.y=e.clientY;
+ if(ptrs.size===2){const [a,b]=[...ptrs.values()],d=Math.hypot(a.x-b.x,a.y-b.y);if(pinch0){cur.rad=clamp(cur.rad*pinch0/d,8,44);goal.rad=cur.rad}pinch0=d;moved+=10}
+});
+const up=e=>{ptrs.delete(e.pointerId);if(ptrs.size<2)pinch0=0;if(moved<6&&performance.now()-downT<500&&e.type==='pointerup')pick(e)};
+stage.addEventListener('pointerup',up);stage.addEventListener('pointercancel',up);
+stage.addEventListener('wheel',e=>{e.preventDefault();cur.rad=clamp(cur.rad*(1+Math.sign(e.deltaY)*.08),8,44);goal.rad=cur.rad},{passive:false});
+const ray=new THREE.Raycaster(),mv=new THREE.Vector2();
+function pick(e){
+ const r=renderer.domElement.getBoundingClientRect();
+ mv.set((e.clientX-r.left)/r.width*2-1,-((e.clientY-r.top)/r.height*2-1));
+ ray.setFromCamera(mv,cam);const h=ray.intersectObjects(pickables,false)[0];
+ if(h&&h.object.userData.step!=null)pickCb(h.object.userData.step);
+}
+let W=1,H=1;
+function resize(){W=stage.clientWidth;H=stage.clientHeight;renderer.setSize(W,H,false)}
+new ResizeObserver(resize).observe(stage);resize();
+const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const tv=new THREE.Vector3(),look=new THREE.Vector3();
+function place(){
+ const sp=Math.sin(cur.ph);
+ cam.position.set(cur.tx+cur.rad*sp*Math.sin(cur.th),cur.rad*Math.cos(cur.ph),cur.tz+cur.rad*sp*Math.cos(cur.th));
+ look.set(cur.tx,1.2,cur.tz);cam.lookAt(look);cam.updateMatrixWorld();
+}
+function frame(t){
+ requestAnimationFrame(frame);
+ if(S.rot&&!reduce&&!ptrs.size&&(S.step===0||S.step===5))goal.th+=.0025;
+ cur.th+=angDiff(cur.th,goal.th)*.08;cur.ph+=(goal.ph-cur.ph)*.08;cur.rad+=(goal.rad-cur.rad)*.08;cur.tx+=(goal.tx-cur.tx)*.08;cur.tz+=(goal.tz-cur.tz)*.08;
+ if(!reduce){kalo.rotation.z=t*.0006;crowd.concat(adv).forEach(p=>{p.position.y=Math.max(0,Math.sin(t*.004+p.userData.ph))*.06})}
+ place();
+ if(!S.vr){
+  renderer.setScissorTest(false);renderer.setViewport(0,0,W,H);cam.aspect=W/H;cam.updateProjectionMatrix();renderer.render(scene,cam);
+  labs.forEach(l=>{tv.copy(l.v).project(cam);const ok=tv.z<1;l.el.style.display=ok?'':'none';l.el.style.left=((tv.x+1)/2*W)+'px';l.el.style.top=((1-tv.y)/2*H)+'px'});
+ }else{
+  const right=new THREE.Vector3().setFromMatrixColumn(cam.matrixWorld,0).multiplyScalar(.5),base=cam.position.clone();
+  renderer.setScissorTest(true);cam.aspect=(W/2)/H;cam.updateProjectionMatrix();
+  [-1,1].forEach(e=>{cam.position.copy(base).addScaledVector(right,e);cam.lookAt(look);cam.updateMatrixWorld();
+   const x=e<0?0:W/2;renderer.setViewport(x,0,W/2,H);renderer.setScissor(x,0,W/2,H);renderer.render(scene,cam)});
+  cam.position.copy(base);
+ }
+}
+requestAnimationFrame(frame);
+function setVR(on){
+ S.vr=on;labelsEl.style.display=on?'none':'';$('#bVr').classList.toggle('on',on);
+ try{if(on)stage.requestFullscreen&&stage.requestFullscreen().catch(()=>{});else if(document.fullscreenElement)document.exitFullscreen()}catch(_){}
+}
+/* Perbarui objek 3D dari hasil hitung */
+function sceneUpdate(m){
+ const p=m.p,show=Math.round(clamp(p.u1,.1,.95)/.95*18);
+ crowd.forEach((c,i)=>{c.visible=i<show});
+ bld.scale.set(.8+.35*S.k,1,.85+.2*S.k);
+ const j=LOC[S.loc].jarak;palms.position.x=-3.2-j*.9;truck.position.x=(-3.2-j*.9-2.6)/2;
+ const mx=Math.max(1,...m.rows.map(r=>Math.abs(r.cf)),p.I),vals=[-p.I].concat(m.rows.map(r=>r.cf));
+ bars.forEach((b,i)=>{const h=vals[i]/mx*1.6,a=Math.max(.04,Math.abs(h));b.scale.y=a;b.position.y=2.4+h/2;b.material.color.setHex(h<0?0xd0483c:0x2fa862)});
+ const n=clamp(Math.round(m.npv/p.I*10),0,12);coins.forEach((c,i)=>{c.visible=i<n});
+ flag.material.color.setHex({good:0x2fa862,warn:0xe0a21a,bad:0xd0483c}[level(m).k]);
+ adv.forEach((a,i)=>{a.userData.head.material.color.setHex(S.adopt.includes(i)?0xf0b13a:0xe0b48a)});
+}
+/* ===== Antarmuka panel ===== */
+let SAMPLE=null;const CASES=PRESETS.slice();
+const jt=n=>fmt(n,1);
+const OUT={pf:()=>`${rp(S.kasus.harga*S.pf)} (${fmt(S.pf*100)}%)`,k:()=>`${fmt(S.k*100)}% · ${fmt(S.kasus.kapasitas*S.k)} ${esc(S.kasus.unit)}/bln`,r:()=>S.r+'%',g:()=>S.g+'%/tahun',infl:()=>S.infl+'%/tahun'};
+const rng=(key,label,min,max,step,val)=>`<div class="rng"><label for="r_${key}">${label}</label><output id="o_${key}">${OUT[key]()}</output><input id="r_${key}" data-r="${key}" type="range" min="${min}" max="${max}" step="${step}" value="${val}"></div>`;
+const nav=(prev,next,lab)=>`<div class="row">${prev!=null?`<button class="btn sec" data-a="go" data-s="${prev}">Kembali</button>`:''}${next!=null?`<button class="btn" data-a="go" data-s="${next}">${lab}</button>`:''}</div>`;
+const efekTxt=e=>({harga:'harga jual',biayaVar:'biaya variabel',biayaTetap:'biaya tetap',util1:'penyerapan pasar',investasi:'investasi'}[e.k])+' '+(e.p>0?'+':'')+e.p+'%';
+
+function renderStepper(){
+ $('#stepper').innerHTML=STEPS.map((s,i)=>`<button class="st${S.step===i?' on':''}${S.seen[i]&&i!==S.step?' ok':''}" data-a="go" data-s="${i}" type="button"><b>${i}</b>${s.n}</button>`).join('');
+ const left=STEPS.reduce((a,s,i)=>a+(S.seen[i]?0:s.m),0);
+ $('#timeLeft').textContent=left?`Estimasi sisa ±${left} menit dari 19`:'Semua misi sudah dikunjungi';
+}
+function renderKpis(m){
+ const k=(l,v,c)=>`<div class="kpi"><span>${l}</span><b class="${c||''}">${v}</b></div>`,lv=level(m);
+ $('#kpis').innerHTML=k('NPV',fmt(m.npv,1)+' jt',m.npv>=0?'pos':'neg')+k('IRR',fmtP(m.irr))+k('Modal kembali',m.pbp==null?'> 5 thn':fmt(m.pbp,1)+' thn')+k('Titik impas',fmt(m.bep*100)+'%');
+ $('#verdict').innerHTML=`<span class="chip ${lv.k}">${lv.t}</span><span>${esc(S.kasus.nama)}${S.scen!=='dasar'?' · skenario '+S.scen:''}</span>`;
+}
+function p0(){
+ const c=S.kasus;
+ return `<div class="card"><div class="eyebrow">Misi 0 · ±2 menit</div><h2>Anda adalah analis kelayakan</h2>
+ <p class="lead">Sekelompok warga di Sulawesi Tenggara ingin memulai usaha. Tugas Anda memutuskan apakah usaha itu layak, lewat empat aspek: pasar, teknis, keuangan, dan rembuk bersama warga. Ketuk bangunan di kampung 3D untuk berpindah misi.</p>
+ <h3 class="sub">Pilih kasus</h3>
+ <div class="opts">${CASES.map((x,i)=>`<button class="opt${x===c?' on':''}" data-a="case" data-i="${i}" type="button"><b>${esc(x.nama)}</b><small>${i>2?'Dibuat GenAI':'Kasus bawaan'}</small></button>`).join('')}</div>
+ <div class="note"><b>${esc(c.nama)}</b>: usaha ${esc(c.produk)}. Nilai lokal: ${esc(c.nilai)}. ${esc(c.kearifan)}</div>
+ ${SAMPLE?`<h3 class="sub">Buat variasi latihan dengan GenAI</h3>
+ <input type="text" id="idea" placeholder="Ide usaha (opsional), mis. kopi, perak, ikan asin" maxlength="80">
+ <div class="row"><button class="btn sec" data-a="gen" id="bGen" type="button"${S.busy?' disabled':''}>Buat kasus baru</button></div>
+ <div class="note" id="genMsg"${S.genMsg?'':' hidden'}>${esc(S.genMsg)}</div>`:`<div class="note">Fitur GenAI aktif saat halaman dibuka lewat Claude. Kasus bawaan tetap bisa dipakai penuh.</div>`}
+ <div class="row"><button class="btn" data-a="go" data-s="1">Mulai Misi 1: Pasar</button></div></div>`;
+}
+function p1(){
+ return `<div class="card"><div class="eyebrow">Misi 1 · Aspek pasar · ±3 menit</div><h2>Siapa pembelinya, dan pada harga berapa?</h2>
+ <p class="lead">Aspek pasar memperkirakan berapa unit yang laku. Kenaikan harga menurunkan jumlah pembeli, dan seberapa besar turunnya bergantung pada segmen.</p>
+ <h3 class="sub">Titik interaksi 1: pilih segmen</h3>
+ <div class="opts">${SEG.map((s,i)=>`<button class="opt${S.seg===i?' on':''}" data-a="seg" data-i="${i}" type="button"><b>${s.n}</b><small>${s.t}</small></button>`).join('')}</div>
+ <h3 class="sub">Titik interaksi 2: atur harga jual</h3>
+ ${rng('pf','Harga jual per '+esc(S.kasus.unit),.7,1.3,.01,S.pf)}
+ <div id="lv"></div>
+ <div class="note">Coba naikkan harga 20% pada segmen rumah tangga, lalu lihat jumlah pembeli di lapak 3D berkurang.</div>
+ ${nav(0,2,'Lanjut ke Misi 2: Teknis')}</div>`;
+}
+function p2(){
+ return `<div class="card"><div class="eyebrow">Misi 2 · Aspek teknis · ±3 menit</div><h2>Di mana dan sebesar apa usaha dibangun?</h2>
+ <p class="lead">Lokasi menentukan jarak ke bahan baku, sewa, dan akses pasar. Kapasitas menentukan investasi dan biaya per unit.</p>
+ <h3 class="sub">Titik interaksi 3: pilih lokasi</h3>
+ <div class="opts">${LOC.map((s,i)=>`<button class="opt${S.loc===i?' on':''}" data-a="loc" data-i="${i}" type="button"><b>${s.n}</b><small>${s.t}</small></button>`).join('')}</div>
+ ${rng('k','Kapasitas produksi',.6,1.4,.05,S.k)}
+ <div id="lv"></div>
+ <div class="note">Perhatikan truk bahan baku di bangunan 3D: lokasi yang dekat sentra bahan baku memangkas biaya variabel, tetapi pasarnya lebih jauh.</div>
+ ${nav(1,3,'Lanjut ke Misi 3: Keuangan')}</div>`;
+}
+function p3(){
+ return `<div class="card"><div class="eyebrow">Misi 3 · Aspek keuangan · ±4 menit</div><h2>Apakah uangnya kembali?</h2>
+ <p class="lead">Arus kas lima tahun dihitung dari pilihan Anda di Misi 1 dan 2. Papan 3D di kampung menunjukkan investasi (merah) dan arus kas tiap tahun.</p>
+ ${rng('r','Tingkat diskon',6,20,1,S.r)}${rng('g','Pertumbuhan penjualan',0,30,1,S.g)}${rng('infl','Kenaikan biaya',0,10,1,S.infl)}
+ <div id="lv"></div>
+ <details class="note"><summary>Apa arti metriknya?</summary><p>NPV adalah nilai sekarang seluruh arus kas dikurangi investasi. IRR adalah imbal hasil tahunan proyek. Modal kembali (payback) adalah waktu sampai kas kumulatif kembali ke nol. Titik impas adalah penjualan minimum agar tidak rugi. Pajak dihitung PPh final UMKM 0,5% dari omzet, dan nilai sisa 10% dari investasi di tahun ke-5.</p></details>
+ ${nav(2,4,'Lanjut ke Misi 4: Rembuk Kalo')}</div>`;
+}
+function p4(){
+ const c=S.kasus;
+ return `<div class="card"><div class="eyebrow">Misi 4 · Rembuk Kalo · ±3 menit</div><h2>Dengarkan warga sebelum memutuskan</h2>
+ <p class="lead">Kalo Sara melambangkan persatuan dan musyawarah dalam adat Tolaki. Di sini, saran warga mengubah asumsi usaha. Anda hanya bisa menerima paling banyak dua saran.</p>
+ <h3 class="sub">Titik interaksi 4: terima saran (${S.adopt.length}/2)</h3>
+ <div class="who">${c.stakeholder.map((s,i)=>`<button class="opt${S.adopt.includes(i)?' on':''}" data-a="adv" data-i="${i}" type="button"><b>${esc(s.peran)}</b><small>${esc(s.saran)}</small><small>Efek: ${s.efek.map(efekTxt).join(', ')}</small></button>`).join('')}</div>
+ <h3 class="sub">Uji ketahanan: skenario</h3>
+ <div class="opts">${['pesimis','dasar','optimis'].map(s=>`<button class="opt${S.scen===s?' on':''}" data-a="scen" data-s="${s}" type="button"><b>${s[0].toUpperCase()+s.slice(1)}</b><small>${s==='pesimis'?'Pasar −15%, biaya +8%':s==='optimis'?'Pasar +10%, biaya −3%':'Asumsi Anda'}</small></button>`).join('')}</div>
+ <div id="lv"></div>
+ ${nav(3,5,'Lanjut ke Misi 5: Putusan')}</div>`;
+}
+function quizzes(){
+ const m=calc('dasar'),up=m.irr!=null&&m.irr>m.p.r;
+ return [
+ {q:'NPV bernilai positif berarti apa?',o:['Nilai sekarang arus kas melebihi investasi, sehingga usaha menambah nilai','Usaha pasti untung di setiap bulan','Modal pasti kembali dalam satu tahun'],a:0},
+ {q:`IRR kasus Anda ${fmtP(m.irr)} dan tingkat diskon ${S.r}%. Apa kesimpulannya?`,o:['Imbal hasil proyek melampaui tingkat diskon, layak dari sisi IRR','Imbal hasil proyek di bawah tingkat diskon, kurang layak dari sisi IRR','IRR tidak berhubungan dengan tingkat diskon'],a:up?0:1},
+ {q:'Mengapa suara petani, pembeli, dan warga didengar sebelum memutuskan?',o:['Supaya asumsi pasar, biaya, dan penerimaan sosial lebih realistis','Supaya NPV otomatis naik','Supaya tidak perlu menghitung ulang'],a:0}];
+}
+const DEC=['Layak','Layak bersyarat','Belum layak'];
+function score(){
+ const m=calc('dasar'),qs=quizzes(),qc=qs.filter((q,i)=>S.quiz[i]===q.a).length;
+ const dOk=S.dec!=null&&DEC[S.dec]===level(m).t,seen=Object.keys(S.seen).length;
+ return {total:Math.round(qc*15+(dOk?30:0)+(S.adopt.length?10:0)+seen/6*15),qc,dOk,seen};
+}
+function p5(){
+ const qs=quizzes(),m=calc('dasar');
+ return `<div class="card"><div class="eyebrow">Misi 5 · Putusan dan refleksi · ±4 menit</div><h2>Putuskan dan pertanggungjawabkan</h2>
+ ${qs.map((q,qi)=>`<div class="q"><p>${qi+1}. ${esc(q.q)}</p>${q.o.map((o,oi)=>{const a=S.quiz[qi],cl=a==null?'':oi===q.a?' ok':a===oi?' no':'';return `<button class="opt${cl}" data-a="qz" data-q="${qi}" data-i="${oi}" type="button">${esc(o)}</button>`}).join('')}</div>`).join('')}
+ <h3 class="sub">Keputusan akhir Anda</h3>
+ <div class="opts">${DEC.map((d,i)=>`<button class="opt${S.dec===i?' on':''}" data-a="dec" data-i="${i}" type="button"><b>${d}</b></button>`).join('')}</div>
+ <h3 class="sub">Alasan (2-3 kalimat)</h3>
+ <textarea id="alasan" rows="3" placeholder="Sebutkan angka dan pertimbangan warga yang mendasari keputusan Anda.">${esc(S.alasan)}</textarea>
+ <div class="row">${SAMPLE?`<button class="btn" data-a="mentor" id="bMentor" type="button"${S.busy?' disabled':''}>Minta umpan balik Mentor AI</button>`:''}<button class="btn sec" data-a="score" type="button">Lihat skor</button><button class="btn sec" data-a="copy" type="button">Salin ringkasan</button></div>
+ <div class="ai" id="aiOut"${S.ai?'':' hidden'}>${esc(S.ai)}</div>
+ <div id="scoreBox"></div>
+ ${nav(4,0,'Kembali ke awal')}</div>`;
+}
+const tpl=[p0,p1,p2,p3,p4,p5];
+function live(m){
+ const el=$('#lv');if(!el)return;const p=m.p,u=esc(S.kasus.unit);
+ const box=(l,v)=>`<div>${l}<b>${v}</b></div>`;
+ if(S.step===1)el.innerHTML=`<div class="live">${box('Harga jual',rp(p.P))}${box('Penyerapan tahun 1',fmt(p.u1*100)+'%')}${box('Penjualan per bulan',fmt(p.Q*p.u1)+' '+u)}${box('Omzet tahun 1',jt(m.rows[0].rev)+' jt')}</div>`;
+ else if(S.step===2){const j=LOC[S.loc].jarak;el.innerHTML=`<div class="live">${box('Investasi',jt(p.I)+' jt')}${box('Kapasitas',fmt(p.Q)+' '+u+'/bln')}${box('Biaya tetap',jt(p.F)+' jt/bln')}${box('Biaya variabel',rp(p.V)+'/'+u)}${box('Jarak bahan baku',j>=5?'Jauh':j<=2?'Dekat':'Sedang')}</div>`}
+ else if(S.step===3)el.innerHTML=`<div class="tbl"><table><tr><th>Tahun</th><th>Terjual (${u})</th><th>Omzet</th><th>Biaya</th><th>Arus kas (jt)</th></tr><tr><td>0</td><td></td><td></td><td></td><td class="neg">${fmt(-p.I,1)}</td></tr>${m.rows.map(r=>`<tr><td>${r.t}</td><td>${fmt(r.units)}</td><td>${fmt(r.rev,1)}</td><td>${fmt(r.vc+r.fc+r.tax,1)}</td><td class="${r.cf<0?'neg':''}">${fmt(r.cf,1)}</td></tr>`).join('')}</table></div><ul class="checks">${checks(m).map(c=>`<li class="${c.ok?'p':''}">${esc(c.t)}</li>`).join('')}</ul>`;
+ else if(S.step===4){
+  const sc=['pesimis','dasar','optimis'].map(s=>({s,m:calc(s)})),mx=Math.max(1,...sc.map(x=>Math.abs(x.m.npv)));
+  el.innerHTML=`<div class="bars">${sc.map(x=>`<div class="bar"><span>${x.s}</span><i class="${x.m.npv<0?'n':''}" style="width:${Math.max(2,Math.abs(x.m.npv)/mx*100)}%"></i><em>${fmt(x.m.npv,1)} jt</em></div>`).join('')}</div><div class="note">NPV tiap skenario dengan saran warga yang Anda terima. Jika NPV pesimis negatif, usaha bergantung pada asumsi pasar yang belum pasti.</div>`;
+ }else el.innerHTML='';
+}
+function refresh(){const m=calc();sceneUpdate(m);renderKpis(m);live(m)}
+function render(){$('#content').innerHTML=tpl[S.step]();refresh()}
+/* ===== Aksi, GenAI, inisialisasi ===== */
+function go(n){
+ if(S.step===4&&n!==4)S.scen='dasar';
+ const ta=$('#alasan');if(ta)S.alasan=ta.value;
+ S.step=n;S.seen[n]=1;sceneFocus(n);renderStepper();render();
+ if(window.innerWidth<=860)window.scrollTo({top:0,behavior:'smooth'});
+}
+pickCb=go;
+function summary(){
+ const m=calc('dasar'),p=m.p,c=S.kasus,ps=calc('pesimis'),op=calc('optimis');
+ return `Kasus: ${c.nama} (${c.produk}). Nilai lokal: ${c.nilai}.
+Segmen: ${SEG[S.seg].n}. Harga jual: ${rp(p.P)}/${c.unit} (penyerapan tahun 1 ${fmt(p.u1*100)}%). Lokasi: ${LOC[S.loc].n}. Kapasitas: ${fmt(p.Q)} ${c.unit}/bulan.
+Investasi ${fmt(p.I,1)} juta; biaya tetap ${fmt(p.F,1)} juta/bulan; biaya variabel ${rp(p.V)}/${c.unit}.
+Tingkat diskon ${S.r}%, pertumbuhan ${S.g}%/tahun, kenaikan biaya ${S.infl}%/tahun.
+Hasil: NPV ${fmt(m.npv,1)} juta; IRR ${fmtP(m.irr)}; modal kembali ${m.pbp==null?'lebih dari 5 tahun':fmt(m.pbp,1)+' tahun'}; titik impas ${fmt(m.bep*100)}% kapasitas.
+Saran warga yang diterima: ${S.adopt.length?S.adopt.map(i=>c.stakeholder[i].peran+' ('+c.stakeholder[i].efek.map(efekTxt).join(', ')+')').join('; '):'belum ada'}.
+NPV skenario pesimis ${fmt(ps.npv,1)} juta, optimis ${fmt(op.npv,1)} juta.
+Status berdasarkan empat kriteria: ${level(m).t}.`;
+}
+function normCase(o){
+ const n=(v,a,b)=>clamp(Number(v),a,b);if(!o||typeof o!=='object')throw 0;
+ const K=['harga','biayaVar','biayaTetap','util1','investasi'];
+ const st=(Array.isArray(o.stakeholder)?o.stakeholder:[]).slice(0,3).map(s=>({peran:String(s.peran||'Warga').slice(0,40),saran:String(s.saran||'').slice(0,170),efek:(Array.isArray(s.efek)?s.efek:[]).filter(e=>K.includes(e.k)).slice(0,2).map(e=>({k:e.k,p:n(e.p,-15,15)}))}));
+ if(st.length<3||st.some(s=>!s.efek.length||!s.saran))throw 0;
+ const c={nama:String(o.nama||'').slice(0,50),produk:String(o.produk||'').slice(0,80),unit:String(o.unit||'unit').slice(0,12),investasi:n(o.investasi,30,600),kapasitas:n(o.kapasitas,20,50000),harga:n(o.harga,1000,5e6),biayaVar:n(o.biayaVar,500,4e6),biayaTetap:n(o.biayaTetap,1,80),tumbuh:n(o.tumbuh,0,30),util1:n(o.util1,30,80),nilai:String(o.nilai||'').slice(0,80),kearifan:String(o.kearifan||'').slice(0,300),stakeholder:st};
+ if(!c.nama||!c.produk||!(c.harga>c.biayaVar)||isNaN(c.investasi+c.kapasitas+c.harga+c.biayaVar+c.biayaTetap+c.tumbuh+c.util1))throw 0;
+ return c;
+}
+const aiErr=e=>({not_granted:'Izin untuk memakai Claude belum diberikan, jadi fitur ini tidak dapat dijalankan.',rate_limited:'Terlalu sering memanggil Claude atau kuota habis. Coba lagi nanti.',invalid_json:'Format jawaban AI belum sesuai. Coba tekan tombol sekali lagi.',cancelled:'Dibatalkan.'}[e&&e.code]||'AI belum bisa menjawab saat ini. Coba lagi sebentar lagi.');
+async function gen(){
+ if(!SAMPLE||S.busy)return;
+ const idea=($('#idea')?.value||'').trim();S.busy=true;S.genMsg='Claude sedang merancang kasus baru...';render();
+ const names=CASES.map(c=>c.nama).join(', ');
+ const prompt=`Anda perancang kasus latihan Studi Kelayakan Bisnis untuk mahasiswa di Sulawesi Tenggara. Buat SATU kasus usaha mikro-kecil baru yang realistis dan berbeda dari: ${names}. ${idea?'Ide dari pengguna: '+idea+'.':'Pilih potensi lokal Sulawesi Tenggara (pangan, kerajinan, perikanan atau pertanian).'}
+Balas HANYA dengan JSON berkunci persis seperti contoh, angka tanpa pemisah ribuan. Uang: investasi dan biayaTetap (per bulan) dalam juta rupiah; harga dan biayaVar dalam rupiah per unit. Aturan: investasi 60-400; margin (harga-biayaVar)/harga 25-45%; titik impas sekitar 50-75% kapasitas; tumbuh 8-18; util1 45-60; nilai dan kearifan merujuk budaya lokal yang benar dan tidak mengada-ada; tepat 3 stakeholder; tiap saran punya 1-2 efek dengan k salah satu dari harga, biayaVar, biayaTetap, util1, investasi dan p persen antara -15 dan 15; sebaiknya satu saran menguntungkan warga tetapi menambah biaya.
+Contoh format:
+${JSON.stringify(PRESETS[2])}`;
+ try{
+  const c=normCase(await SAMPLE.json(prompt));
+  if(CASES.length>3)CASES.splice(3,CASES.length-3);
+  CASES.push(c);loadCase(c);S.genMsg='Kasus baru siap. Angka di kampung 3D sudah berubah mengikuti kasus ini.';
+ }catch(e){S.genMsg=typeof e==='number'||!e||!e.code?'Kasus dari AI belum lengkap atau tidak masuk akal. Coba tekan tombol sekali lagi.':aiErr(e)}
+ S.busy=false;render();
+}
+async function mentor(){
+ if(!SAMPLE||S.busy)return;
+ const ta=$('#alasan');if(ta)S.alasan=ta.value;
+ if(S.dec==null){S.ai='Pilih keputusan akhir Anda terlebih dahulu.';render();return}
+ S.busy=true;S.ai='Mentor AI sedang membaca analisis Anda...';render();
+ const prompt=`Anda dosen pembimbing studi kelayakan bisnis. Beri umpan balik singkat (maksimal 170 kata, Bahasa Indonesia, tanpa tabel) atas analisis mahasiswa. Urutan: satu pujian yang spesifik pada angka atau pilihan mereka, dua kelemahan atau asumsi yang perlu diuji, lalu satu pertanyaan reflektif tentang nilai lokal atau pemangku kepentingan. Jangan mengganti keputusan mereka.
+
+DATA ANALISIS:
+${summary()}
+Keputusan mahasiswa: ${DEC[S.dec]}.
+Alasan mahasiswa: ${S.alasan||'(kosong)'}`;
+ try{
+  await SAMPLE(prompt,{cache:false,onText:({text})=>{S.ai=text;const o=$('#aiOut');if(o){o.hidden=false;o.textContent=text}}});
+ }catch(e){S.ai=(e&&e.text)?e.text+'\n\n(Terputus: '+aiErr(e)+')':aiErr(e)}
+ S.busy=false;render();
+}
+function showScore(){
+ const s=score();
+ $('#scoreBox').innerHTML=`<div class="note"><div class="score">${s.total}/100</div>Kuis benar ${s.qc} dari 3 · keputusan ${s.dOk?'sesuai':'belum sesuai'} dengan empat kriteria · saran warga ${S.adopt.length?'diterima':'belum diterima'} · misi dikunjungi ${s.seen} dari 6.${!s.dOk&&S.dec!=null?` Hasil hitung Anda berstatus <b>${level(calc('dasar')).t}</b>; jelaskan jika Anda memilih berbeda.`:''}</div>`;
+}
+async function copySum(){
+ const t=summary()+(S.dec!=null?`\nKeputusan: ${DEC[S.dec]}. Alasan: ${S.alasan}`:'');
+ $('#scoreBox').innerHTML=`<div class="note">Ringkasan untuk laporan:</div><div class="ai" id="sumTxt">${esc(t)}</div>`;
+ try{await navigator.clipboard.writeText(t);$('#scoreBox').firstChild.textContent='Ringkasan tersalin. Tempel ke laporan Anda:'}catch(_){const r=document.createRange();r.selectNodeContents($('#sumTxt'));const s=getSelection();s.removeAllRanges();s.addRange(r)}
+}
+const stepEls=$('#content');
+stepEls.addEventListener('click',e=>{
+ const t=e.target.closest('[data-a]');if(!t)return;const a=t.dataset.a,i=+t.dataset.i;
+ if(a==='go')go(+t.dataset.s);
+ else if(a==='case'){loadCase(CASES[i]);S.genMsg='';render();sceneFocus(S.step)}
+ else if(a==='seg'){S.seg=i;render()}
+ else if(a==='loc'){S.loc=i;render()}
+ else if(a==='adv'){const x=S.adopt.indexOf(i);if(x>=0)S.adopt.splice(x,1);else if(S.adopt.length<2)S.adopt.push(i);render()}
+ else if(a==='scen'){S.scen=t.dataset.s;render()}
+ else if(a==='qz'){const ta=$('#alasan');if(ta)S.alasan=ta.value;S.quiz[+t.dataset.q]=i;render()}
+ else if(a==='dec'){const ta=$('#alasan');if(ta)S.alasan=ta.value;S.dec=i;render()}
+ else if(a==='gen')gen();
+ else if(a==='mentor')mentor();
+ else if(a==='score')showScore();
+ else if(a==='copy')copySum();
+});
+$('#stepper').addEventListener('click',e=>{const t=e.target.closest('[data-s]');if(t)go(+t.dataset.s)});
+stepEls.addEventListener('input',e=>{
+ const r=e.target.dataset.r;
+ if(r){S[r]=parseFloat(e.target.value);$('#o_'+r).textContent=OUT[r]();refresh()}
+ else if(e.target.id==='alasan')S.alasan=e.target.value;
+});
+$('#bRot').addEventListener('click',e=>{S.rot=!S.rot;e.currentTarget.classList.toggle('on',S.rot)});
+$('#bVr').addEventListener('click',()=>setVR(!S.vr));
+$('#bReset').addEventListener('click',resetCam);
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&S.vr)setVR(false)});
+sceneFocus(0);renderStepper();render();
+(async()=>{try{const c=window.claude;if(c&&c.use){SAMPLE=await c.use('sample');if(SAMPLE&&S.step===0&&!S.busy)render()}}catch(_){}})();
+</script>
+
+</body></html>
